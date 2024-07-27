@@ -4,7 +4,7 @@ import app from './app.js';
 
 const port =  3001;
 
-dotenv.config();
+dotenv.config({path:'./.env'});
 
 connectDB().then(()=>{
     app.on('error',(err)=>{

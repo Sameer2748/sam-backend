@@ -1,4 +1,4 @@
-// fucntion for promise return 
+// fucntion for promise return check q function and return it as a fucntion for promise return check
 const asyncHandler= (requestHandler)=>{
     return (req,res,next)=>{
         Promise.resolve(requestHandler(req,res,next)).catch(err=>next(err));

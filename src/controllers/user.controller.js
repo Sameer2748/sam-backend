@@ -6,8 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const registerUser = asyncHandler( async(req,res)=>{
     // get details
-    const {username, email, fullname, password} = req.body;
-    console.log(username, email, fullname, password);
+    const {fullname, email, username, password } = req.body
 
     // validations
     if([fullname, email, username, password].some((field)=> field?.trim() === "" )){
@@ -19,14 +18,16 @@ const registerUser = asyncHandler( async(req,res)=>{
         throw new ApiError(409, "username or email already exists")
     }
 
-    // encrypt password
-
     // handle avatar and cover image using multer middleware and cloudinary
-    console.log(req.files);
     const avatarlocalpath = req.files?.avatar[0]?.path;
-    const coverimagelocalpath = req.files?.coverimage[0]?.path;
+    // const coverimagelocalpath = req.files?.coverImage[0]?.path;
     if(!avatarlocalpath ){
         throw new ApiError(400, "avatar is required");
+    }
+    
+    let coverimagelocalpath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files?.coverImage.length >0){
+        coverimagelocalpath = req.files.coverImage[0].path;
     }
 
     //upload to cloudinary which return the reponse then we get url form it
@@ -39,16 +40,14 @@ const registerUser = asyncHandler( async(req,res)=>{
     const user = await User.create({fullname, avatar:avatar.url, coverImage:coverImage?.url || "",email, password, username: username.toLowerCase() })
 
     //remove password and refreshtoken
-    const createduser = await User.create(user._id).select("-password -refreshToken")
+    const createduser = await User.findById(user._id).select("-password -refreshToken")
     if(!createduser){
         throw new ApiError(500, "failed to create user");
     }
 
-    //return res
 
     return res.status(201).json(new ApiResponse(200, createduser,"user registered succesfully"))
 
-    res.send("done")
 })
 
 export {registerUser};
